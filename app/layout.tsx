@@ -26,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/Notes">Notes</Link>
                 <Link href="/Videos">Videos</Link>
                 <Link href="/dashboard">Dashboard</Link>
+                <Link href="/admin">Admin</Link>
               </div>
               <div className="flex items-center gap-3">
                 <Show when="signed-out">
