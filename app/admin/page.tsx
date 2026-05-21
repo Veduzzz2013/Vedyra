@@ -1,0 +1,17 @@
+"use client";
+import { useEffect, useState } from "react";
+type Course = { id: string; title: string; classLevel: "Class 8" | "Class 9"; section: "notes" | "videos" };
+const STORAGE_KEY = "vedyra_courses";
+const defaults: Course[] = [
+  { id: "n1", title: "Science Complete Notes", classLevel: "Class 8", section: "notes" },
+  { id: "n2", title: "Mathematics Complete Notes", classLevel: "Class 9", section: "notes" },
+  { id: "v1", title: "History Video Masterclass", classLevel: "Class 8", section: "videos" },
+  { id: "v2", title: "Algebra Crash Course", classLevel: "Class 9", section: "videos" },
+];
+export default function AdminPage(){const [authorized,setAuthorized]=useState(false);const [email,setEmail]=useState("");const [password,setPassword]=useState("");const [courses,setCourses]=useState<Course[]>(defaults);const [title,setTitle]=useState("");const [classLevel,setClassLevel]=useState<Course['classLevel']>('Class 8');const [section,setSection]=useState<Course['section']>('notes');const [error,setError]=useState("");
+useEffect(()=>{const saved=localStorage.getItem(STORAGE_KEY);if(saved) setCourses(JSON.parse(saved));},[]);
+function save(next:Course[]){setCourses(next);localStorage.setItem(STORAGE_KEY,JSON.stringify(next));}
+async function login(){setError("");const res=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});if(!res.ok){setError('Invalid admin credentials');return;}setAuthorized(true);}
+function addCourse(){if(!title.trim())return;save([...courses,{id:crypto.randomUUID(),title:title.trim(),classLevel,section}]);setTitle("");}
+if(!authorized)return <main className="mx-auto max-w-md p-6"><h1 className="text-3xl font-bold">Admin Login</h1><div className="mt-5 space-y-3 rounded-2xl border p-4"><input className="w-full rounded border p-2" placeholder="Admin Email" value={email} onChange={(e)=>setEmail(e.target.value)} /><input className="w-full rounded border p-2" type="password" placeholder="Admin Password" value={password} onChange={(e)=>setPassword(e.target.value)} />{error&&<p className="text-sm text-red-600">{error}</p>}<button onClick={login} className="rounded bg-blue-600 px-4 py-2 text-white">Login</button></div></main>;
+return <main className="mx-auto max-w-5xl p-6"><h1 className="text-3xl font-bold">Admin Course Manager</h1><div className="mt-6 grid gap-3 rounded-2xl border p-4 md:grid-cols-4"><input className="rounded border p-2 md:col-span-2" placeholder="Course title" value={title} onChange={(e)=>setTitle(e.target.value)} /><select className="rounded border p-2" value={classLevel} onChange={(e)=>setClassLevel(e.target.value as Course['classLevel'])}><option>Class 8</option><option>Class 9</option></select><select className="rounded border p-2" value={section} onChange={(e)=>setSection(e.target.value as Course['section'])}><option value="notes">Notes</option><option value="videos">Videos</option></select><button onClick={addCourse} className="rounded bg-blue-600 px-4 py-2 text-white md:col-span-4">Add Course</button></div><div className="mt-6 grid gap-4 md:grid-cols-2">{courses.map(c=><article key={c.id} className="rounded-xl border p-4"><p className="text-xs text-slate-500">{c.section.toUpperCase()} • {c.classLevel}</p><h3 className="font-semibold">{c.title}</h3><button onClick={()=>save(courses.filter(x=>x.id!==c.id))} className="mt-3 rounded border px-3 py-1 text-sm">Remove</button></article>)}</div></main>}
